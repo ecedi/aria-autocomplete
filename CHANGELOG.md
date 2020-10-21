@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file.
 
 -   Add `keepUserInput` option. Keep user input even if there are no results.
 
+### Fixed
+
+-   Accessibility issues :
+    -   focus was lost after deletion of a selected item : return on the input.
+    -   aria-describedby for the suggestions list.
+    -   screenreader texts as p instead of span.
+    -   `sr-assistance` hidden with display none.
+    -   `sr-announcements` emptied 2s after each announcement.
 
 ## [1.2.0] - 2020-10-01
 

@@ -15,6 +15,7 @@ import {
     CLEANED_LABEL_PROP,
     SELECTED_OPTION_PROP,
     ORIGINALLY_LABEL_FOR_PROP,
+    ORIGINALLY_LABEL_ID_PROP,
 } from './autocomplete-constants';
 
 import {
@@ -35,6 +36,7 @@ export default class Autocomplete {
     element: HTMLElement | HTMLInputElement | HTMLSelectElement;
     elementIsInput: boolean;
     elementIsSelect: boolean;
+    elementHasLabel: boolean;
 
     // elements
     list: HTMLUListElement;
@@ -73,6 +75,7 @@ export default class Autocomplete {
     pollingTimer: ReturnType<typeof setTimeout>;
     showAllPrepTimer: ReturnType<typeof setTimeout>;
     announcementTimer: ReturnType<typeof setTimeout>;
+    announcementEmptyTimer: ReturnType<typeof setTimeout>;
     componentBlurTimer: ReturnType<typeof setTimeout>;
     elementChangeEventTimer: ReturnType<typeof setTimeout>;
 
@@ -257,15 +260,38 @@ export default class Autocomplete {
         if (!this.srAnnouncements || !text || typeof text !== 'string') {
             return;
         }
-        // in immediate case, do not user timer
+        // in immediate case, do not use timer
         if (delay === 0) {
             this.srAnnouncements.textContent = text;
+
+            this.emptyAnnouncement();
             return;
         }
 
         clearTimeout(this.announcementTimer);
         this.announcementTimer = setTimeout(() => {
             this.srAnnouncements.textContent = text;
+
+            this.emptyAnnouncement();
+        }, delay);
+    }
+
+    /**
+     * empty the screen reader announcement
+     */
+    emptyAnnouncement(delay: number = 2000) {
+        if (!this.srAnnouncements) {
+            return;
+        }
+        // in immediate case, do not use timer
+        if (delay === 0) {
+            this.srAnnouncements.textContent = '';
+            return;
+        }
+
+        clearTimeout(this.announcementEmptyTimer);
+        this.announcementEmptyTimer = setTimeout(() => {
+            this.srAnnouncements.textContent = '';
         }, delay);
     }
 
@@ -328,6 +354,8 @@ export default class Autocomplete {
             this.triggerAutoGrow();
             // make sure to announce deletion to screen reader users
             this.announce(`${label} ${this.options.srDeletedText}`, 0);
+            // return focus to input
+            this.input.focus();
         }
     }
 
@@ -1452,15 +1480,6 @@ export default class Autocomplete {
      */
     setInputStartingStates(setAriaAttrs: boolean = true) {
         if (setAriaAttrs) {
-            // update corresponding label to now focus on the new input
-            if (this.ids.ELEMENT) {
-                const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
-                if (label) {
-                    label[ORIGINALLY_LABEL_FOR_PROP] = this.ids.ELEMENT;
-                    label.setAttribute('for', this.ids.INPUT);
-                }
-            }
-
             // update aria-describedby and aria-labelledby attributes if present
             const describedBy = this.element.getAttribute('aria-describedby');
             if (describedBy) {
@@ -1515,6 +1534,18 @@ export default class Autocomplete {
                 `class="${cssName}__input${inputClass}"${name}${placeholder} />`
         );
 
+        // update corresponding label to now focus on the new input
+        if (this.ids.ELEMENT) {
+            const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
+            if (label) {
+                label[ORIGINALLY_LABEL_FOR_PROP] = this.ids.ELEMENT;
+                label[ORIGINALLY_LABEL_ID_PROP] = label.getAttribute('id');
+                label.setAttribute('for', this.ids.INPUT);
+                label.setAttribute('id', this.ids.LABEL);
+                this.elementHasLabel = true;
+            }
+        }
+
         // button to show all available options
         if (o.showAllControl) {
             newHtml.push(
@@ -1526,19 +1557,20 @@ export default class Autocomplete {
         const explainerText = o.srListLabelText;
         const listClass = o.listClassName ? ` ${o.listClassName}` : '';
         const explainer = explainerText ? ` aria-label="${explainerText}"` : '';
+        const describer = this.elementHasLabel ? ` aria-describedby="${this.ids.LABEL}"` : '';
         newHtml.push(
             `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" role="listbox" ` +
-                `aria-hidden="true" hidden="hidden"${explainer}></ul>`
+                `aria-hidden="true" hidden="hidden"${explainer} ${describer}></ul>`
         );
         // add the screen reader assistance element
         newHtml.push(
-            `<span class="sr-only ${cssName}__sr-only ${cssName}__sr-assistance" ` +
-                `id="${this.ids.SR_ASSISTANCE}">${o.srAssistiveText}</span>`
+            `<p class="hide hidden ${cssName}--hide ${cssName}__sr-assistance" ` +
+                `id="${this.ids.SR_ASSISTANCE}">${o.srAssistiveText}</p>`
         );
         // add element for added screen reader announcements
         newHtml.push(
-            `<span class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
-                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></span>`
+            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
+                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></p>`
         );
 
         // close all and append
@@ -1550,11 +1582,16 @@ export default class Autocomplete {
      * destroy component
      */
     destroy() {
-        // return original label 'for' attribute back to element id
+        // return original label 'for' attribute back to element id, 'id' attribute to label original id
         const label: HTMLLabelElement = document.querySelector('[for="' + this.ids.INPUT + '"]');
         if (label && label[ORIGINALLY_LABEL_FOR_PROP]) {
             label.setAttribute('for', label[ORIGINALLY_LABEL_FOR_PROP]);
             delete label[ORIGINALLY_LABEL_FOR_PROP];
+
+            if (label[ORIGINALLY_LABEL_ID_PROP]) {
+                label.setAttribute('id', label[ORIGINALLY_LABEL_ID_PROP]);
+                delete label[ORIGINALLY_LABEL_ID_PROP];
+            }
         }
 
         // remove the document click if still bound
