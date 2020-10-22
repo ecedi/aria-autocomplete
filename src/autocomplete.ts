@@ -43,6 +43,7 @@ export default class Autocomplete {
     input: HTMLInputElement;
     wrapper: HTMLDivElement;
     showAll: HTMLSpanElement;
+    srAssistance: HTMLSpanElement;
     srAnnouncements: HTMLSpanElement;
 
     // non elements
@@ -300,7 +301,7 @@ export default class Autocomplete {
      */
     isSelectedElem(element: Element): boolean {
         const sourceEntry = element && element[SELECTED_OPTION_PROP];
-        return this.multiple && sourceEntry && typeof sourceEntry === 'object';
+        return this.multiple && typeof sourceEntry === 'object';
     }
 
     /**
@@ -434,7 +435,7 @@ export default class Autocomplete {
         // insert new elements
         // can't check against fragment.children or fragment.childElementCount, as does not work in IE
         if (fragment.childNodes && fragment.childNodes.length) {
-            this.wrapper.insertBefore(fragment, this.list);
+            this.wrapper.insertBefore(fragment, this.srAssistance);
         }
 
         // set ids on selected DOM elements
@@ -968,7 +969,7 @@ export default class Autocomplete {
             ) {
                 return;
             }
-
+            
             // cancel any running async call
             if (this.xhr && typeof this.xhr.abort === 'function') {
                 this.xhr.abort();
@@ -1651,6 +1652,7 @@ export default class Autocomplete {
         this.input = document.getElementById(this.ids.INPUT) as HTMLInputElement;
         this.wrapper = document.getElementById(this.ids.WRAPPER) as HTMLDivElement;
         this.showAll = document.getElementById(this.ids.BUTTON) as HTMLSpanElement;
+        this.srAssistance = document.getElementById(this.ids.SR_ASSISTANCE) as HTMLSpanElement;
         this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS) as HTMLSpanElement;
 
         // set internal source array, from static elements if necessary
