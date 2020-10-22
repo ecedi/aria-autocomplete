@@ -959,12 +959,6 @@ export default class Autocomplete {
         this.componentBlurTimer = setTimeout(() => {
             // do nothing if blurring to an element within the list
             const activeElem: Element = document.activeElement;
-            // console.log('------- activeElem | showAll | showAll is activeElem | isSelectedElem(activeElem) | wrapper.contains(activeElem)');
-            // console.log(activeElem);
-            // console.log(this.showAll);
-            // console.log('showAll is activeElem : ' + (this.showAll === activeElem));
-            // console.log('isSelectedElem(activeElem) : ' + (this.isSelectedElem(activeElem)));
-            // console.log('wrapper.contains(activeElem) : ' + (this.wrapper.contains(activeElem)));
             if (
                 !force &&
                 activeElem &&
@@ -973,10 +967,9 @@ export default class Autocomplete {
                 // must base this on the wrapper to allow scrolling the list in IE
                 this.wrapper.contains(activeElem)
             ) {
-                // console.log('>> return : leave the list open');
                 return;
             }
-            // console.log('>> continue : close the list');
+            
             // cancel any running async call
             if (this.xhr && typeof this.xhr.abort === 'function') {
                 this.xhr.abort();
