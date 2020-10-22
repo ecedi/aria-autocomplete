@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2020-xx-xx
+## [1.3.0] - 2020-10-22
 
 ### Added
 
@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
     -   screenreader texts as p instead of span.
     -   `sr-assistance` hidden with display none.
     -   `sr-announcements` emptied 2s after each announcement.
+    -   selected items rendered after the suggestions list instead of before.
+-   `isSelectedElem()` now returns false instead of undefined.
 
 ## [1.2.0] - 2020-10-01
 
