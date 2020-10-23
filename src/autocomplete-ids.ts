@@ -7,6 +7,7 @@ export default class {
     LIST: string;
     INPUT: string;
     BUTTON: string;
+    DELETE: string;
     OPTION: string;
     WRAPPER: string;
     SR_ASSISTANCE: string;
@@ -22,6 +23,7 @@ export default class {
         this.LABEL = `${this.PREFIX}-label`;
         this.LIST = `${this.PREFIX}-list`;
         this.BUTTON = `${this.PREFIX}-button`;
+        this.DELETE = `${this.PREFIX}-delete`;
         this.OPTION = `${this.PREFIX}-option`;
         this.WRAPPER = `${this.PREFIX}-wrapper`;
         this.INPUT = optionId || `${this.PREFIX}-input`;

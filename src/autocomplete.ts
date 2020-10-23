@@ -43,6 +43,7 @@ export default class Autocomplete {
     input: HTMLInputElement;
     wrapper: HTMLDivElement;
     showAll: HTMLSpanElement;
+    deleteAll: HTMLSpanElement;
     srAssistance: HTMLSpanElement;
     srAnnouncements: HTMLSpanElement;
 
@@ -392,6 +393,9 @@ export default class Autocomplete {
             this.enable();
         }
 
+        const o = this.options;
+        const cssName = this.cssNameSpace;
+
         // no elements, and none selected, do nothing
         const currentSelectedDomElems = this.getSelectedElems();
         if (!this.selected.length && !currentSelectedDomElems.length) {
@@ -431,6 +435,27 @@ export default class Autocomplete {
             // if there wasn't, add one
             fragment.appendChild(this.createSelectedElemFrom(selected));
         });
+
+        // button to delete all selected items
+        console.log(this.deleteAll);
+        console.log(this.selected.length);
+        if (o.deleteAllControl && !this.deleteAll && this.selected.length) {
+            const deleteAll = document.createElement('span');
+            deleteAll.setAttribute('role', 'button');
+            deleteAll.setAttribute('class', `${cssName}__delete-all`);
+            deleteAll.setAttribute('tabindex', '0');
+            deleteAll.setAttribute('id', `${this.ids.DELETE}`);
+            // deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
+            deleteAll.innerHTML = `<span>${o.srDeleteAllText}</span>`;
+
+            fragment.appendChild(deleteAll);
+            console.log('create deleteAll');
+
+            this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
+        } else if (this.deleteAll && !this.selected.length) {
+            console.log('remove deleteAll');
+            this.wrapper.removeChild(this.deleteAll);
+        }
 
         // insert new elements
         // can't check against fragment.children or fragment.childElementCount, as does not work in IE
@@ -1662,6 +1687,9 @@ export default class Autocomplete {
         const wrapperClassesToAdd: string[] = [];
         if (this.options.showAllControl) {
             wrapperClassesToAdd.push(`${this.cssNameSpace}__wrapper--show-all`);
+        }
+        if (this.options.deleteAllControl) {
+            wrapperClassesToAdd.push(`${this.cssNameSpace}__wrapper--delete-all`);
         }
         if (this.autoGrow) {
             wrapperClassesToAdd.push(`${this.cssNameSpace}__wrapper--autogrow`);
