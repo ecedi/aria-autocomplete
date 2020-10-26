@@ -437,8 +437,6 @@ export default class Autocomplete {
         });
 
         // button to delete all selected items
-        console.log(this.deleteAll);
-        console.log(this.selected.length);
         if (o.deleteAllControl && !this.deleteAll && this.selected.length) {
             const deleteAll = document.createElement('span');
             deleteAll.setAttribute('role', 'button');
@@ -449,12 +447,10 @@ export default class Autocomplete {
             deleteAll.innerHTML = `<span>${o.srDeleteAllText}</span>`;
 
             fragment.appendChild(deleteAll);
-            console.log('create deleteAll');
 
-            this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
         } else if (this.deleteAll && !this.selected.length) {
-            console.log('remove deleteAll');
             this.wrapper.removeChild(this.deleteAll);
+            this.deleteAll = null;
         }
 
         // insert new elements
@@ -462,6 +458,9 @@ export default class Autocomplete {
         if (fragment.childNodes && fragment.childNodes.length) {
             this.wrapper.insertBefore(fragment, this.srAssistance);
         }
+
+        // update deleteAll
+        this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
 
         // set ids on selected DOM elements
         const ids: string[] = this.getSelectedElems().map((element: HTMLElement, index: number) => {
