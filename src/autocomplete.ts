@@ -362,6 +362,15 @@ export default class Autocomplete {
     }
 
     /**
+     * remove all selected options
+     */
+    removeAllSelected() {
+        for (let i = (this.selected.length -1); i >=0; i -= 1) {
+            this.removeEntryFromSelected(this.selected[i]);
+        }
+    }
+
+    /**
      * create a DOM element for entry in selected array
      */
     createSelectedElemFrom(entry: any): HTMLSpanElement {
@@ -1131,6 +1140,11 @@ export default class Autocomplete {
             return;
         }
 
+        if (this.deleteAll && target === this.deleteAll) {
+            this.removeAllSelected();
+            return;
+        }
+
         if (this.menuOpen) {
             event.preventDefault();
             if (this.currentSelectedIndex > -1) {
@@ -1271,6 +1285,13 @@ export default class Autocomplete {
                 this.input.focus();
                 return;
             }
+
+            if (event.target === this.deleteAll || this.deleteAll.contains(event.target as Node)) {
+                this.removeAllSelected();
+                return;
+            }
+
+            // if clicking on a selected element, remove it
             if (this.isSelectedElem(event.target as Element)) {
                 this.removeEntryFromSelected(event.target[SELECTED_OPTION_PROP]);
             }
