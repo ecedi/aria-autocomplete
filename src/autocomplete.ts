@@ -1670,7 +1670,7 @@ export default class Autocomplete {
         clearTimeout(this.elementChangeEventTimer);
 
         // clear stored element vars
-        ['element', 'list', 'input', 'wrapper', 'showAll', 'srAssistance', 'srAnnouncements'].forEach(
+        ['element', 'list', 'input', 'wrapper', 'showAll', 'deleteAll', 'srAssistance', 'srAnnouncements'].forEach(
             (entry: string) => (this[entry] = null)
         );
     }
