@@ -468,6 +468,11 @@ export default class Autocomplete {
             this.wrapper.insertBefore(fragment, this.srAssistance);
         }
 
+        // keep deleteAll after all selected elements
+        if (this.deleteAll) {
+            this.wrapper.insertBefore(this.deleteAll, this.srAssistance);
+        }
+
         // update deleteAll
         this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
 
