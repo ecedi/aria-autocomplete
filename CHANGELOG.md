@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2020-10-XX
+
+### Added
+
+-   `deleteAllControl` option to render a control that triggers removing all selected items.
+-   `srDeleteAllText` option for this control's text.
+
+### Fixed
+
+-   Clear `srAssistance` variable on destroy.
+
 ## [1.3.0] - 2020-10-22
 
 ### Added
