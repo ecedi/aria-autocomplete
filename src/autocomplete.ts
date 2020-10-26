@@ -452,8 +452,7 @@ export default class Autocomplete {
             deleteAll.setAttribute('class', `${cssName}__delete-all`);
             deleteAll.setAttribute('tabindex', '0');
             deleteAll.setAttribute('id', `${this.ids.DELETE}`);
-            // deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
-            deleteAll.innerHTML = `<span>${o.srDeleteAllText}</span>`;
+            deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
 
             fragment.appendChild(deleteAll);
 
@@ -1291,7 +1290,7 @@ export default class Autocomplete {
                 return;
             }
 
-            if (event.target === this.deleteAll || this.deleteAll.contains(event.target as Node)) {
+            if (this.deleteAll && (event.target === this.deleteAll || this.deleteAll.contains(event.target as Node))) {
                 this.removeAllSelected();
                 return;
             }
