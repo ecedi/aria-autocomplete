@@ -156,10 +156,9 @@
   }
 }
 .aria-autocomplete__delete-all {
-  display: block;
+  float: right;
   width: 30px;
   height: 30px;
-  margin-left: auto;
   border: 1px solid #606060;
   border-radius: 50%;
   background-color: #606060;
