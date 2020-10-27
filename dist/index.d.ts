@@ -9,6 +9,7 @@ export interface IAriaAutocompleteOptions {
     maxResults?: number;
     keepUserInput?: boolean;
     showAllControl?: boolean;
+    deleteAllControl?: boolean;
     confirmOnBlur?: boolean;
     multiple?: boolean;
     autoGrow?: boolean;
@@ -26,6 +27,7 @@ export interface IAriaAutocompleteOptions {
     srDeleteText?: string;
     srDeletedText?: string;
     srShowAllText?: string;
+    srDeleteAllText?: string;
     srSelectedText?: string;
     srListLabelText?: string;
     srAssistiveText?: string;

@@ -184,6 +184,27 @@
         }
     }
 
+    &__delete-all {
+        float: right;
+        width: 30px;
+        height: 30px;
+        border: 1px solid @dark-grey;
+        border-radius: 50%;
+        background-color: @dark-grey;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='10' height='10' viewBox='0 0 10 10' version='1.1'%3E%3Cg id='surface1'%3E%3Cpath d='M 0.234375 10 L 5 5.21875 L 9.765625 10 L 9.988281 9.78125 L 5.21875 5 L 9.988281 0.21875 L 9.765625 0 L 5 4.78125 L 0.234375 0 L 0.0117188 0.21875 L 4.78125 5 L 0.0117188 9.78125 Z M 0.234375 10 ' style='stroke:%23ffffff;fill-rule:nonzero;fill:%23ffffff;fill-opacity:1;'/%3E%3C/g%3E%3C/svg%3E");
+        color: #f3f3f3;
+        box-sizing: border-box;
+        cursor: pointer;
+
+        &:hover,
+        &:focus {
+            background-color: darken(@dark-grey, 10%);
+            color: #fff;
+        }
+    }
+
     // bottom margin for input in multiple mode
     &__wrapper--multiple &__input {
         margin-bottom: 5px;
@@ -193,6 +214,16 @@
     &__wrapper--show-all,
     &__wrapper--autogrow&__wrapper--multiple&__wrapper--show-all {
         padding-right: 43px;
+    }
+
+    // force space for delete all control
+    &__wrapper--autogrow&__wrapper--delete-all {
+        padding-right: 40px;
+    }
+
+    // force space for show+delete all controls
+    &__wrapper--autogrow&__wrapper--show-all&__wrapper--delete-all {
+        padding-right: 83px;
     }
 
     // loading state
@@ -265,6 +296,17 @@
 
     &__wrapper--autogrow &__selected {
         order: 1;
+    }
+
+    &__wrapper--autogrow &__delete-all {
+        position: absolute;
+        top: 50%;
+        right: 4px;
+        transform: translateY(-50%);
+    }
+
+    &__wrapper--autogrow&__wrapper--show-all &__delete-all {
+        right: 47px;
     }
 }
 

@@ -43,6 +43,7 @@ export default class Autocomplete {
     input: HTMLInputElement;
     wrapper: HTMLDivElement;
     showAll: HTMLSpanElement;
+    deleteAll: HTMLSpanElement;
     srAssistance: HTMLSpanElement;
     srAnnouncements: HTMLSpanElement;
 
@@ -361,6 +362,15 @@ export default class Autocomplete {
     }
 
     /**
+     * remove all selected options
+     */
+    removeAllSelected() {
+        for (let i = (this.selected.length -1); i >=0; i -= 1) {
+            this.removeEntryFromSelected(this.selected[i]);
+        }
+    }
+
+    /**
      * create a DOM element for entry in selected array
      */
     createSelectedElemFrom(entry: any): HTMLSpanElement {
@@ -391,6 +401,9 @@ export default class Autocomplete {
         } else {
             this.enable();
         }
+
+        const o = this.options;
+        const cssName = this.cssNameSpace;
 
         // no elements, and none selected, do nothing
         const currentSelectedDomElems = this.getSelectedElems();
@@ -432,11 +445,35 @@ export default class Autocomplete {
             fragment.appendChild(this.createSelectedElemFrom(selected));
         });
 
+        // button to delete all selected items
+        if (o.deleteAllControl && !this.deleteAll && this.selected.length) {
+            const deleteAll = document.createElement('span');
+            deleteAll.setAttribute('role', 'button');
+            deleteAll.setAttribute('class', `${cssName}__delete-all`);
+            deleteAll.setAttribute('tabindex', '0');
+            deleteAll.setAttribute('id', `${this.ids.DELETE}`);
+            deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
+
+            fragment.appendChild(deleteAll);
+
+        } else if (this.deleteAll && !this.selected.length) {
+            this.wrapper.removeChild(this.deleteAll);
+            this.deleteAll = null;
+        }
+
         // insert new elements
         // can't check against fragment.children or fragment.childElementCount, as does not work in IE
         if (fragment.childNodes && fragment.childNodes.length) {
             this.wrapper.insertBefore(fragment, this.srAssistance);
         }
+
+        // keep deleteAll after all selected elements
+        if (this.deleteAll) {
+            this.wrapper.insertBefore(this.deleteAll, this.srAssistance);
+        }
+
+        // update deleteAll
+        this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
 
         // set ids on selected DOM elements
         const ids: string[] = this.getSelectedElems().map((element: HTMLElement, index: number) => {
@@ -1107,6 +1144,11 @@ export default class Autocomplete {
             return;
         }
 
+        if (this.deleteAll && target === this.deleteAll) {
+            this.removeAllSelected();
+            return;
+        }
+
         if (this.menuOpen) {
             event.preventDefault();
             if (this.currentSelectedIndex > -1) {
@@ -1247,6 +1289,13 @@ export default class Autocomplete {
                 this.input.focus();
                 return;
             }
+
+            if (this.deleteAll && (event.target === this.deleteAll || this.deleteAll.contains(event.target as Node))) {
+                this.removeAllSelected();
+                return;
+            }
+
+            // if clicking on a selected element, remove it
             if (this.isSelectedElem(event.target as Element)) {
                 this.removeEntryFromSelected(event.target[SELECTED_OPTION_PROP]);
             }
@@ -1621,7 +1670,7 @@ export default class Autocomplete {
         clearTimeout(this.elementChangeEventTimer);
 
         // clear stored element vars
-        ['element', 'list', 'input', 'wrapper', 'showAll', 'srAnnouncements'].forEach(
+        ['element', 'list', 'input', 'wrapper', 'showAll', 'deleteAll', 'srAssistance', 'srAnnouncements'].forEach(
             (entry: string) => (this[entry] = null)
         );
     }
@@ -1662,6 +1711,9 @@ export default class Autocomplete {
         const wrapperClassesToAdd: string[] = [];
         if (this.options.showAllControl) {
             wrapperClassesToAdd.push(`${this.cssNameSpace}__wrapper--show-all`);
+        }
+        if (this.options.deleteAllControl) {
+            wrapperClassesToAdd.push(`${this.cssNameSpace}__wrapper--delete-all`);
         }
         if (this.autoGrow) {
             wrapperClassesToAdd.push(`${this.cssNameSpace}__wrapper--autogrow`);

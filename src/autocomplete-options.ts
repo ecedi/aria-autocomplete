@@ -47,6 +47,11 @@ export default class AutocompleteOptions {
     showAllControl: boolean = false;
 
     /**
+     * Render a control that triggers removing all selected items.
+     */
+    deleteAllControl: boolean = false;
+
+    /**
      * Confirm currently active selection when blurring off of the control. If
      * no active selection, will compare current input value against available labels
      */
@@ -139,6 +144,11 @@ export default class AutocompleteOptions {
      * Value for aria-label attribute on the show all control
      */
     srShowAllText: string = `Show all`;
+
+    /**
+     * Value for delete all control
+     */
+    srDeleteAllText: string = `Delete all`;
 
     /**
      * Screen reader text announced after confirming a selection.
