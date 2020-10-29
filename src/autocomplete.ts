@@ -500,20 +500,9 @@ export default class Autocomplete {
     setInputDescription() {
         const exists = this.input.getAttribute('aria-describedby');
         const current = trimString(exists);
-        let describedBy = current.replace(this.ids.SR_ASSISTANCE, '');
+        let describedBy = `${current} ${this.ids.SR_ASSISTANCE}`;
 
-        if (!this.input.value.length) {
-            describedBy = `${describedBy} ${this.ids.SR_ASSISTANCE}`;
-        }
-
-        // set or remove attribute, but only if necessary
-        if ((describedBy = trimString(describedBy))) {
-            if (describedBy !== current) {
-                this.input.setAttribute('aria-describedby', describedBy);
-            }
-        } else if (exists) {
-            this.input.removeAttribute('aria-describedby');
-        }
+        this.input.setAttribute('aria-describedby', describedBy);
     }
 
     /**
@@ -930,9 +919,6 @@ export default class Autocomplete {
             ) {
                 value = '';
             }
-
-            // handle aria-describedby
-            this.setInputDescription();
 
             // length check
             if (!forceShowAll && value.length < this.options.minLength) {
