@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2020-10-29
+
+### Fixed
+
+-   Input `aria-describedby` to point to `sr-assistance` permanently.
+-   Help differentiate controls from several autocomplete by adding them `aria-describedby` pointing to the label.
+
 ## [1.4.0] - 2020-10-27
 
 ### Added

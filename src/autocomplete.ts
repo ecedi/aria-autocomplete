@@ -380,6 +380,7 @@ export default class Autocomplete {
         span.setAttribute('class', `${this.cssNameSpace}__selected`);
         span.setAttribute('role', 'button');
         span.setAttribute('tabindex', '0');
+        span.setAttribute('aria-describedby', `${this.ids.LABEL}`);
         span[SELECTED_OPTION_PROP] = entry;
         span.textContent = label;
         return span;
@@ -452,6 +453,7 @@ export default class Autocomplete {
             deleteAll.setAttribute('class', `${cssName}__delete-all`);
             deleteAll.setAttribute('tabindex', '0');
             deleteAll.setAttribute('id', `${this.ids.DELETE}`);
+            deleteAll.setAttribute('aria-describedby', `${this.ids.LABEL}`);
             deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
 
             fragment.appendChild(deleteAll);
@@ -500,20 +502,9 @@ export default class Autocomplete {
     setInputDescription() {
         const exists = this.input.getAttribute('aria-describedby');
         const current = trimString(exists);
-        let describedBy = current.replace(this.ids.SR_ASSISTANCE, '');
+        let describedBy = `${current} ${this.ids.SR_ASSISTANCE}`;
 
-        if (!this.input.value.length) {
-            describedBy = `${describedBy} ${this.ids.SR_ASSISTANCE}`;
-        }
-
-        // set or remove attribute, but only if necessary
-        if ((describedBy = trimString(describedBy))) {
-            if (describedBy !== current) {
-                this.input.setAttribute('aria-describedby', describedBy);
-            }
-        } else if (exists) {
-            this.input.removeAttribute('aria-describedby');
-        }
+        this.input.setAttribute('aria-describedby', describedBy);
     }
 
     /**
@@ -930,9 +921,6 @@ export default class Autocomplete {
             ) {
                 value = '';
             }
-
-            // handle aria-describedby
-            this.setInputDescription();
 
             // length check
             if (!forceShowAll && value.length < this.options.minLength) {
@@ -1600,7 +1588,7 @@ export default class Autocomplete {
         if (o.showAllControl) {
             newHtml.push(
                 `<span role="button" aria-label="${o.srShowAllText}" class="${cssName}__show-all" ` +
-                    `tabindex="0" id="${this.ids.BUTTON}" aria-expanded="false"></span>`
+                    `tabindex="0" id="${this.ids.BUTTON}" aria-describedby="${this.ids.LABEL}" aria-expanded="false"></span>`
             );
         }
         // add the list holder
