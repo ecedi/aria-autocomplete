@@ -1365,10 +1365,12 @@ export default class Autocomplete {
         });
         // trigger options selection
         this.list.addEventListener('click', (event) => {
-            if (event.target !== this.list) {
+            const clickTarget = event.target as HTMLElement;
+            if (clickTarget !== this.list) {
                 const options = getChildrenOf(this.list);
                 if (options.length) {
-                    const optionIndex = options.indexOf(event.target as HTMLElement);
+                    const option = clickTarget.closest('[role="option"]') as HTMLElement;
+                    const optionIndex = options.indexOf(option);
                     this.handleOptionSelect(event, optionIndex);
                 }
             }
