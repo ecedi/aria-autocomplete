@@ -320,6 +320,47 @@ export default class Autocomplete {
     }
 
     /**
+     * delete all selected items
+     */
+    deleteAllSelected() {
+        // prevent removing if deletions are disabled
+        if (this.deletionsDisabled) {
+            return;
+        }
+
+        // cycle through and de-select
+        let i = this.selected.length;
+        while (i--) {
+            const option: any = mergeObjects(this.selected[i]);
+            // set option or checkbox to not be selected
+            setElementState(option.element, false, this);
+            // fire on delete before updating the DOM
+            this.triggerOptionCallback('onDelete', [option]);
+        }
+
+        // reset selected array
+        // use splice to modify it to maintain API reference
+        this.selected.splice(0);
+
+        // update original element values based on now selected items
+        this.setSourceElementValues();
+
+        // re-build the selected items markup
+        this.buildMultiSelected();
+
+        // update input size in autoGrow mode
+        this.triggerAutoGrow();
+
+        // use `srDeletedText` option for now for generic `deleted` announcement;
+        // if this causes issues across locales, build up full deleted string
+        // e.g. `deleted option 1, deleted option 2, etc.`
+        this.announce(this.options.srDeletedText, 0);
+
+        // return focus to input
+        this.input.focus();
+    }
+
+    /**
      * remove object from selected options array
      */
     removeEntryFromSelected(entry: any) {
@@ -358,15 +399,6 @@ export default class Autocomplete {
             this.announce(`${label} ${this.options.srDeletedText}`, 0);
             // return focus to input
             this.input.focus();
-        }
-    }
-
-    /**
-     * remove all selected options
-     */
-    removeAllSelected() {
-        for (let i = (this.selected.length -1); i >=0; i -= 1) {
-            this.removeEntryFromSelected(this.selected[i]);
         }
     }
 
@@ -446,39 +478,15 @@ export default class Autocomplete {
             fragment.appendChild(this.createSelectedElemFrom(selected));
         });
 
-        // button to delete all selected items
-        if (o.deleteAllControl && !this.deleteAll && this.selected.length) {
-            const deleteAll = document.createElement('span');
-            deleteAll.setAttribute('role', 'button');
-            deleteAll.setAttribute('class', `${cssName}__delete-all`);
-            deleteAll.setAttribute('tabindex', '0');
-            deleteAll.setAttribute('id', `${this.ids.DELETE}`);
-            deleteAll.setAttribute('aria-describedby', `${this.ids.LABEL}`);
-            deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
-
-            fragment.appendChild(deleteAll);
-
-        } else if (this.deleteAll && !this.selected.length) {
-            this.wrapper.removeChild(this.deleteAll);
-            this.deleteAll = null;
-        }
-
         // insert new elements
         // can't check against fragment.children or fragment.childElementCount, as does not work in IE
         if (fragment.childNodes && fragment.childNodes.length) {
             this.wrapper.insertBefore(fragment, this.srAssistance);
         }
 
-        // keep deleteAll after all selected elements
-        if (this.deleteAll) {
-            this.wrapper.insertBefore(this.deleteAll, this.srAssistance);
-        }
-
-        // update deleteAll
-        this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
-
         // set ids on selected DOM elements
-        const ids: string[] = this.getSelectedElems().map((element: HTMLElement, index: number) => {
+        const selectedElems = this.getSelectedElems();
+        const ids: string[] = selectedElems.map((element: HTMLElement, index: number) => {
             const id = `${this.ids.OPTION_SELECTED}-${index}`;
             element.setAttribute('id', id);
             return id;
@@ -493,6 +501,29 @@ export default class Autocomplete {
             this.input.removeAttribute('placeholder');
         } else if (this.options.placeholder) {
             this.input.setAttribute('placeholder', this.options.placeholder);
+        }
+
+        // remove delete all control if only 1 selected item (or none)
+        if (this.selected.length <= 1) {
+            if (this.deleteAll) {
+                this.deleteAll.parentNode.removeChild(this.deleteAll);
+                this.deleteAll = null;
+            }
+        }
+        // add the delete all control
+        else if (this.options.deleteAllControl && !this.deleteAll && selectedElems[0]) {
+            const deleteAll = document.createElement('span');
+            deleteAll.setAttribute('role', 'button');
+            deleteAll.setAttribute('class', `${cssName}__delete-all`);
+            deleteAll.setAttribute('tabindex', '0');
+            deleteAll.setAttribute('id', `${this.ids.DELETE}`);
+            deleteAll.setAttribute('aria-describedby', `${this.ids.LABEL}`);
+            deleteAll.innerHTML = `<span class="sr-only ${cssName}__sr-only">${o.srDeleteAllText}</span>`;
+
+            selectedElems[0].parentNode.insertBefore(deleteAll, selectedElems[0]);
+
+            // update deleteAll
+            this.deleteAll = document.getElementById(this.ids.DELETE) as HTMLSpanElement;
         }
     }
 
@@ -987,8 +1018,10 @@ export default class Autocomplete {
             if (
                 !force &&
                 activeElem &&
-                !(this.showAll && this.showAll === activeElem) && // exception for show all button
-                !this.isSelectedElem(activeElem) && // exception for selected items
+                // exception for delete all button
+                !(this.deleteAll && this.deleteAll === activeElem) &&
+                // exception for selected items, as these sit below the input by default
+                !this.isSelectedElem(activeElem) &&
                 // must base this on the wrapper to allow scrolling the list in IE
                 this.wrapper.contains(activeElem)
             ) {
@@ -1123,17 +1156,17 @@ export default class Autocomplete {
             return;
         }
 
+        if (this.deleteAll && target === this.deleteAll) {
+            this.deleteAllSelected();
+            return;
+        }
+
         if (this.disabled) {
             return;
         }
 
         if (this.showAll && target === this.showAll) {
             this.filterPrepShowAll(event);
-            return;
-        }
-
-        if (this.deleteAll && target === this.deleteAll) {
-            this.removeAllSelected();
             return;
         }
 
@@ -1279,7 +1312,7 @@ export default class Autocomplete {
             }
 
             if (this.deleteAll && (event.target === this.deleteAll || this.deleteAll.contains(event.target as Node))) {
-                this.removeAllSelected();
+                this.deleteAllSelected();
                 return;
             }
 
@@ -1332,10 +1365,12 @@ export default class Autocomplete {
         });
         // trigger options selection
         this.list.addEventListener('click', (event) => {
-            if (event.target !== this.list) {
+            const clickTarget = event.target as HTMLElement;
+            if (clickTarget !== this.list) {
                 const options = getChildrenOf(this.list);
                 if (options.length) {
-                    const optionIndex = options.indexOf(event.target as HTMLElement);
+                    const option = clickTarget.closest('[role="option"]') as HTMLElement;
+                    const optionIndex = options.indexOf(option);
                     this.handleOptionSelect(event, optionIndex);
                 }
             }

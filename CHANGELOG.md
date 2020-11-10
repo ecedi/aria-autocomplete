@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.2] - 2020-11-09
+
+### Fixed
+
+-   `deleteAll` rendered at the beginning of the selected items, and only if more than 1 item is selected.
+-   Handling click event on potential HTML children of options.
+-   Documentation for `showAll` & `deleteAll` controls.
+
 ## [1.4.1] - 2020-10-29
 
 ### Fixed

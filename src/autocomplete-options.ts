@@ -47,7 +47,8 @@ export default class AutocompleteOptions {
     showAllControl: boolean = false;
 
     /**
-     * Render a control that triggers removing all selected items.
+     * In multiple mode, if more than 1 item is selected,
+     * add a button at the beginning of the selected items as a shortcut to delete all
      */
     deleteAllControl: boolean = false;
 
