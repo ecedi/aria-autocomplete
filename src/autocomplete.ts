@@ -1459,13 +1459,29 @@ export default class Autocomplete {
      * build up selected array if starting element was an input, and had a value
      */
     prepSelectedFromArray(source: any[]) {
-        const value = this.elementIsInput && (this.element as HTMLInputElement).value;
-        if (value && source && source.length) {
-            // account for multiple mode
-            const multiple: boolean = this.options.multiple;
-            const separator: string = this.options.multipleSeparator;
-            const valueArr: string[] = multiple ? value.split(separator) : [value];
+        let valueArr = [];
 
+        // account for multiple mode
+        const multiple: boolean = this.options.multiple;
+        const separator: string = this.options.multipleSeparator;
+
+        const value = this.elementIsInput && (this.element as HTMLInputElement).value;
+        if (value) {
+            valueArr = multiple ? value.split(separator) : [value];
+        }
+
+        const options: NodeListOf<HTMLOptionElement> = this.elementIsSelect && this.element.querySelectorAll('option');
+        if (options) {
+            for (let i = 0, l = options.length; i < l; i += 1) {
+                const option: HTMLOptionElement = options[i];
+                // if has a value other than empty string and is selected, add to array
+                if (!!option.value && option.selected) {
+                    valueArr.push(option.value);
+                }
+            }
+        }
+
+        if (valueArr.length && source && source.length) {
             valueArr.forEach((val: string) => {
                 // make sure it is not already in the selected array
                 // but is in the source array (check via 'value', not 'label')
