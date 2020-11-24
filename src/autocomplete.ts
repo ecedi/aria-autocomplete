@@ -609,8 +609,11 @@ export default class Autocomplete {
                 // or create a new option if doesn't exist
                 if (!elementHTML) {
                     const options: NodeListOf<HTMLOptionElement> = this.element.querySelectorAll('option');
-                    this.element[options.length] = new Option(entry.label, value, false, true);
+                    elementHTML = this.element[options.length] = new Option(entry.label, value, false, true);
                 }
+
+                // update selected entry to point on HTML element
+                entry.element = elementHTML;
             }
 
             setElementState(elementHTML, true, this); // element processing
@@ -1482,18 +1485,22 @@ export default class Autocomplete {
         const multiple: boolean = this.options.multiple;
         const separator: string = this.options.multipleSeparator;
 
+        // handle initial value in original text input
         const value = this.elementIsInput && (this.element as HTMLInputElement).value;
         if (value) {
             valueArr = multiple ? value.split(separator) : [value];
         }
 
+        // handle initial selected options in original select
         const options: NodeListOf<HTMLOptionElement> = this.elementIsSelect && this.element.querySelectorAll('option');
+        let elementHTML;
         if (options) {
             for (let i = 0, l = options.length; i < l; i += 1) {
                 const option: HTMLOptionElement = options[i];
                 // if has a value other than empty string and is selected, add to array
                 if (!!option.value && option.selected) {
                     valueArr.push(option.value);
+                    elementHTML = option;
                 }
             }
         }
@@ -1505,7 +1512,12 @@ export default class Autocomplete {
                 if (this.indexOfValueIn(this.selected, val, 'value') === -1) {
                     const indexInSource = this.indexOfValueIn(source, val, 'value');
                     if (indexInSource > -1) {
-                        this.selected.push(source[indexInSource]);
+                        const indexInSelected = this.selected.push(source[indexInSource]);
+
+                        // update selected entry to point on HTML element
+                        if (elementHTML) {
+                            this.selected[indexInSelected - 1].element = elementHTML;
+                        }
                     }
                 }
             });
