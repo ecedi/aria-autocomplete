@@ -601,21 +601,14 @@ export default class Autocomplete {
 
             let elementHTML = entry.element;
 
-            // if no HTML element associated to this entry, handle option in original select (in case of function/array/async source)
+            // if no HTML element associated to this entry (= function/array/async source), handle option in original select
             if (!elementHTML && this.elementIsSelect) {
                 // use existing option element
-                const options: NodeListOf<HTMLOptionElement> = this.element.querySelectorAll('option');
-                if (options) {
-                    for (let i = 0, l = options.length; i < l; i += 1) {
-                        const option: HTMLOptionElement = options[i];
-                        if (option.value == value) {
-                            elementHTML = option;
-                        }
-                    }
-                }
+                elementHTML = this.element.querySelector('option[value="' + value + '"]');
 
                 // or create a new option if doesn't exist
                 if (!elementHTML) {
+                    const options: NodeListOf<HTMLOptionElement> = this.element.querySelectorAll('option');
                     this.element[options.length] = new Option(entry.label, value, false, true);
                 }
             }
