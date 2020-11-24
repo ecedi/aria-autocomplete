@@ -593,10 +593,34 @@ export default class Autocomplete {
      */
     setSourceElementValues() {
         const valToSet: string[] = [];
+        // update original select or checkboxes
         for (let i = 0, l = this.selected.length; i < l; i += 1) {
             const entry = this.selected[i];
-            valToSet.push(entry.value);
-            setElementState(entry.element, true, this); // element processing
+            const value = entry.value;
+            valToSet.push(value);
+
+            let elementHTML = entry.element;
+
+            // if no HTML element associated to this entry, handle option in original select (in case of function/array/async source)
+            if (!elementHTML && this.elementIsSelect) {
+                // use existing option element
+                const options: NodeListOf<HTMLOptionElement> = this.element.querySelectorAll('option');
+                if (options) {
+                    for (let i = 0, l = options.length; i < l; i += 1) {
+                        const option: HTMLOptionElement = options[i];
+                        if (option.value == value) {
+                            elementHTML = option;
+                        }
+                    }
+                }
+
+                // or create a new option if doesn't exist
+                if (!elementHTML) {
+                    this.element[options.length] = new Option(entry.label, value, false, true);
+                }
+            }
+
+            setElementState(elementHTML, true, this); // element processing
         }
 
         // set original input value
